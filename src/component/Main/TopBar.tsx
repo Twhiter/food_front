@@ -381,7 +381,7 @@ const Register: FC<RegisterProps> = props => {
     }
 
 
-    function phoneRule(value) {
+     function phoneRule(value) {
         if (value.length !== 9) {
             updatePhoneAndError(value,true,"incorrect phone length");
             return false

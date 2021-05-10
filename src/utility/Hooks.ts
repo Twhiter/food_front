@@ -2,6 +2,7 @@ import {Dispatch, SetStateAction, useEffect, useState} from "react";
 import {UserBaseInfo, UserInfo} from "../dataStructure/UserInfo";
 import axios from "axios";
 import {responseHandler} from "./handler";
+import {Address} from "../dataStructure/Address";
 
 export function useLocalUserInfo():[UserInfo,Dispatch<SetStateAction<UserInfo>>] {
 
@@ -37,3 +38,23 @@ export function fetchUserInfo(user_id:number):[UserBaseInfo, Dispatch<SetStateAc
     return [baseInfo,setBaseInfo];
 
 }
+
+
+export function useAddress(user_id:number):[Address[], Dispatch<SetStateAction<Address[]>>] {
+
+    const [address,setAddress] = useState([]);
+
+    useEffect(() => {
+        axios.get("/api/userAddress/" + user_id)
+            .then(resp => responseHandler<Address[]>(resp))
+            .then(data => {
+                if (data == undefined)
+                    return;
+                setAddress(data);
+                console.log(data)
+            });
+    },[]);
+
+    return [address,setAddress];
+}
+
