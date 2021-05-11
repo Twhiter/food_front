@@ -103,8 +103,13 @@ const OrderView: FC<OrderViewProps> = (props) => {
             <CenterComp>
                 <ThemeProvider theme={createMuiTheme()}>
                     <ThemeProvider theme={theme}>
-                        <Button variant={"contained"} color={"primary"} style={{color: 'white'}}
-                                onClick={props.onOrder}>
+                        <Button
+                            variant={"contained"}
+                            color={"primary"}
+                            style={{color: 'white'}}
+                            onClick={props.onOrder}
+                            disabled={props.total === 0}
+                        >
                             ORDER NOW
                         </Button>
                     </ThemeProvider>

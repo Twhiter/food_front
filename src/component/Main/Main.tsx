@@ -1,6 +1,16 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {Dispatch, FC, SetStateAction, useEffect, useState} from "react";
 import {Content, Slide} from "./Slide";
-import {Grid} from "@material-ui/core";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
+    MenuItem,
+    Select,
+    Typography
+} from "@material-ui/core";
 import {Food, FoodSelected} from "./Food";
 import {Cart, CartProps} from "./Cart";
 import * as DataType from "../../dataStructure/Food";
@@ -8,6 +18,8 @@ import * as FoodType from "../../dataStructure/Food";
 import axios from "axios";
 import {responseHandler} from "../../utility/handler"
 import {FoodInCart} from "../../dataStructure/Food";
+import {useAddress, useLocalUserInfo} from "../../utility/Hooks";
+import {Address} from "../../dataStructure/Address";
 
 
 const contents:Content[] = [
@@ -44,11 +56,96 @@ const contents:Content[] = [
 
 
 
+interface PayDialogProps {
+    open:boolean
+    setOpen:Dispatch<SetStateAction<boolean>>
+    foodItems:FoodInCart[]
+    setItem:Dispatch<SetStateAction<FoodInCart[]>>
+
+}
+
+
+
+const  PayDialog:FC<PayDialogProps> = props => {
+
+
+    const [userInfo,setUserInfo] = useLocalUserInfo();
+    const [addList,setAddrList] = useAddress(userInfo.user_id);
+
+
+    let selectedAddr;
+
+    let total = 0;
+    props.foodItems.forEach(value => total += value.price * value.number);
+
+    function payClick() {
+
+        axios.post("/api/order", {
+
+            user_id:userInfo.user_id,
+            address_id:selectedAddr,
+            total:total.toFixed(2),
+            items:props.foodItems.map(value => ({FoodSale_id:value.id,number:value.number}))
+        }).then(resp => responseHandler<string| undefined>(resp))
+            .then(data => {
+
+                if (data == undefined) {
+                    alert('Pay successfully');
+                    props.setOpen(false);
+                    props.setItem([]);
+                } else
+                    alert(data)
+            });
+    }
+
+
+
+    return (
+        <React.Fragment>
+            <Dialog open={props.open} onClose={() =>props.setOpen(false)}>
+                <DialogTitle>Pay</DialogTitle>
+
+                <DialogContent>
+                    <Typography variant={"h5"}>Total:{total.toFixed(2)}</Typography>
+                </DialogContent>
+
+                <DialogActions>
+                    <Select onChange={e => selectedAddr = e.target.value}>
+                        {
+                            addList.map(value =>
+                                <MenuItem
+                                    value={value.address_id}
+                                    key={value.address_id}>
+                                    {value.district + "," + value.detail}
+                                </MenuItem>
+                            )
+                        }
+                    </Select>
+
+                    <Button color={"primary"} onClick={payClick}>Pay</Button>
+                </DialogActions>
+
+
+            </Dialog>
+        </React.Fragment>
+    )
+
+
+
+}
+
+
+
+
 export const Main:FC = () => {
 
     const cartprops:CartProps = {
         onOrder:(event) => {
-            alert('order now');
+            if (userInfo == undefined) {
+                alert('please login');
+                return;
+            }
+            setOpen(true)
         },
         onAdd:(event) => {
 
@@ -124,11 +221,13 @@ export const Main:FC = () => {
     }
 
 
+    const [open,setOpen] = useState(false);
     const [items,setItem] = useState<FoodInCart[]>([]);
 
-
-
     const [foods,setFoods] = useState<FoodType.FoodArea[]>([]);
+
+    const [userInfo,setUserInfo] = useLocalUserInfo();
+
 
     async function addToCartClick(food:FoodSelected) {
 
@@ -191,6 +290,7 @@ export const Main:FC = () => {
                     </Grid>
                 </Grid>
             </div>
+            <PayDialog open={open} setOpen={setOpen} foodItems={items} setItem={setItem}/>
         </React.Fragment>
     )
 }

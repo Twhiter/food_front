@@ -45,16 +45,25 @@ export function useAddress(user_id:number):[Address[], Dispatch<SetStateAction<A
     const [address,setAddress] = useState([]);
 
     useEffect(() => {
-        axios.get("/api/userAddress/" + user_id)
-            .then(resp => responseHandler<Address[]>(resp))
-            .then(data => {
-                if (data == undefined)
-                    return;
-                setAddress(data);
-                console.log(data)
-            });
+
+        (async function() {
+            const data = await fetchAddress(user_id);
+            if (data == undefined)
+                return;
+            setAddress(data);
+        })();
+
+
     },[]);
 
     return [address,setAddress];
 }
+
+export async function fetchAddress(user_id:number) {
+
+   const resp = await  axios.get("/api/userAddress/" + user_id);
+    return await responseHandler<Address[]>(resp);
+
+}
+
 
