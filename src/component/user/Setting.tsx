@@ -8,16 +8,17 @@ import {
     DialogTitle,
     FormControl,
     Grid,
-    Select,
+    Select, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     TextField,
     Typography
 } from "@material-ui/core";
-import {fetchUserInfo, useAddress} from "../../utility/Hooks";
+import {fetchUserInfo, useAddress, useSimpleOrders} from "../../utility/Hooks";
 import Button from "@material-ui/core/Button";
 import {Address} from "../../dataStructure/Address";
 import {CheckRespData, UserBaseInfo} from "../../dataStructure/UserInfo";
 import axios from "axios";
 import {responseHandler} from "../../utility/handler";
+import {SimpleOrder} from "../../dataStructure/Order";
 
 export function Setting() {
 
@@ -25,6 +26,7 @@ export function Setting() {
 
     const [baseInfo, setBaseInfo] = fetchUserInfo(user_id);
     const [addressList,setAddressList] = useAddress(user_id);
+    const [simpleOrders,setSimpleOrders] = useSimpleOrders(user_id);
 
 
     return (
@@ -54,8 +56,6 @@ export function Setting() {
                     </Button>
                 </Grid>
 
-
-
             </CenterComp>
 
 
@@ -65,9 +65,89 @@ export function Setting() {
                 </div>
             </CenterComp>
 
+
+        <CenterComp>
+            <OrderComp SimpleOrders={simpleOrders}/>
+        </CenterComp>
+
+
+
         </React.Fragment>
     )
 }
+
+
+interface OrderCompProps {
+    SimpleOrders:SimpleOrder[]
+}
+
+const OrderComp:FC<OrderCompProps> = props => {
+
+    return (
+        <React.Fragment>
+            <div style={{marginTop:'50px'}}>
+
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                        <TableRow>
+                            <TableCell>Order Id</TableCell>
+                            <TableCell>Create Time</TableCell>
+                            <TableCell>Delivery Time</TableCell>
+                            <TableCell>Finish Time</TableCell>
+                            <TableCell>Cancel time</TableCell>
+                            <TableCell>District</TableCell>
+                            <TableCell>Detail Position</TableCell>
+                            <TableCell>Phone</TableCell>
+                            <TableCell>Operation</TableCell>
+                        </TableRow>
+                        </TableHead>
+
+
+                        <TableBody>
+                        {
+                            props.SimpleOrders.map(value => (
+
+                                <TableRow key={value.order_id}>
+                                    <TableCell>{value.order_id}</TableCell>
+                                    <TableCell>{value.create_time?new Date(value.create_time).toLocaleString():''}</TableCell>
+                                    <TableCell>{value.delivery_time}</TableCell>
+                                    <TableCell>{value.finish_time}</TableCell>
+                                    <TableCell>{value.cancel_time}</TableCell>
+                                    <TableCell>{value.district}</TableCell>
+                                    <TableCell>{value.detail}</TableCell>
+                                    <TableCell>{value.phone}</TableCell>
+                                    <TableCell>
+                                        <Button
+                                            color={"primary"}
+                                            onClick={()=>window.location.href='/order/' + value.order_id}>
+                                            detail
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+
+
+                                )
+                            )
+                        }
+                        </TableBody>
+
+                    </Table>
+                </TableContainer>
+            </div>
+        </React.Fragment>
+    )
+
+}
+
+
+
+
+
+
+
+
+
 
 interface PhoneChangeDialog {
     setBaseInfo:Dispatch<SetStateAction<UserBaseInfo>>

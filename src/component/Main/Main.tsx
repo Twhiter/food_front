@@ -70,7 +70,7 @@ const  PayDialog:FC<PayDialogProps> = props => {
 
 
     const [userInfo,setUserInfo] = useLocalUserInfo();
-    const [addList,setAddrList] = useAddress(userInfo.user_id);
+    const [addList,setAddrList] = useAddress(userInfo?userInfo.user_id:0);
 
 
     let selectedAddr;
@@ -314,6 +314,7 @@ export const FoodArea:FC<FoodAreaProps> = (props) => {
                           FoodBase_id={value.FoodBase_id}
                           name={value.name}
                           ingredients={value.ingredients}
+                          category={value.category}
                           image={value.image}
                           style_size_price={value.style_size_price}
                           addToCartClick={props.addToCartClick}
